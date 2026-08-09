@@ -1,52 +1,32 @@
-# Git
 .git
+.github
 .gitignore
-.gitattributes
 
-# Dependencies
-node_modules
-
-# Next.js build output
 .next
-out
-
-# Build output
-build
-dist
-
-# Test output
+node_modules
 coverage
+
 playwright-report
 test-results
 blob-report
 
-# Local environment files
 .env
 .env.*
 !.env.example
 !.env.test.example
 !.env.e2e.example
 
-# IDE
+.history
 .vscode
 .idea
 
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# Logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
 
-# Temporary
-*.tmp
-*.temp
+Dockerfile*
+compose*.yaml
 
-# Local secrets
-*.pem
-*.key
-*.p12
-*.pfx
+README.md
+
+src/generated/prisma
