@@ -1,0 +1,309 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f8;
+  color: #17202a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem;
+}
+
+.page-top {
+  display: block;
+  min-height: 100vh;
+}
+
+.content {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+}
+
+.content-narrow {
+  width: min(100%, 48rem);
+}
+
+.card {
+  width: min(100%, 48rem);
+  padding: 2rem;
+  border: 1px solid #d8dee4;
+  border-radius: 0.75rem;
+  background: #ffffff;
+}
+
+.card h1,
+.page-header h1 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.card p {
+  line-height: 1.6;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.button-primary {
+  border-color: #273e5f;
+  background: #273e5f;
+  color: #ffffff;
+}
+
+.button-secondary {
+  border-color: #b7c0ca;
+  background: #ffffff;
+  color: #17202a;
+}
+
+.button-danger {
+  border-color: #a12622;
+  background: #a12622;
+  color: #ffffff;
+}
+
+.alert {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.4rem;
+}
+
+.alert-success {
+  border: 1px solid #93c5aa;
+  background: #edf8f1;
+}
+
+.alert-error {
+  border: 1px solid #df9b98;
+  background: #fff0ef;
+}
+
+.task-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #d8dee4;
+  border-radius: 0.6rem;
+  background: #ffffff;
+}
+
+.task-main {
+  min-width: 0;
+}
+
+.task-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-heading a {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.task-meta {
+  margin-bottom: 0;
+  color: #59636e;
+  font-size: 0.875rem;
+}
+
+.task-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid #c8d0d8;
+  border-radius: 999px;
+  background: #f7f9fb;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.task-form {
+  padding: 1.5rem;
+  border: 1px solid #d8dee4;
+  border-radius: 0.6rem;
+  background: #ffffff;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-field label {
+  font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #aeb8c2;
+  border-radius: 0.35rem;
+  background: #ffffff;
+  color: #17202a;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.delete-action {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.inline-error {
+  margin: 0;
+  color: #a12622;
+  font-size: 0.875rem;
+}
+
+.detail-list {
+  margin: 0 0 2rem;
+  border-top: 1px solid #d8dee4;
+}
+
+.detail-list > div {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #d8dee4;
+}
+
+.detail-list dt {
+  font-weight: 700;
+}
+
+.detail-list dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.empty-state {
+  padding: 3rem 2rem;
+  border: 1px dashed #aeb8c2;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  text-align: center;
+}
+
+.empty-state h1,
+.empty-state h2 {
+  margin-top: 0;
+}
+
+.loading-message {
+  padding: 2rem;
+  border: 1px solid #d8dee4;
+  border-radius: 0.6rem;
+  background: #ffffff;
+}
+
+@media (max-width: 48rem) {
+  .page {
+    padding: 1rem;
+  }
+
+  .page-header,
+  .task-item {
+    flex-direction: column;
+  }
+
+  .task-actions {
+    flex-wrap: wrap;
+  }
+
+  .detail-list > div {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+}

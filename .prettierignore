@@ -1,0 +1,12 @@
+.next
+node_modules
+coverage
+out
+build
+playwright-report
+test-results
+src/generated/prisma
+pnpm-lock.yaml
+blob-report
+dist
+.history

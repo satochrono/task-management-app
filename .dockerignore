@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+
+# Next.js build output
+.next
+out
+
+# Build output
+build
+dist
+
+# Test output
+coverage
+playwright-report
+test-results
+blob-report
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.test.example
+!.env.e2e.example
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Temporary
+*.tmp
+*.temp
+
+# Local secrets
+*.pem
+*.key
+*.p12
+*.pfx
