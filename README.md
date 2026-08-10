@@ -14,6 +14,7 @@
 - Prisma ORM 7.9.1
 - PostgreSQL 18.4
 - Docker Desktop with WSL 2 backend
+- Git
 
 ## Package manager
 

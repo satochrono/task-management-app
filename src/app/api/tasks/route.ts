@@ -10,6 +10,10 @@ import {
   type TaskWriteInput,
 } from "@/modules/task/presentation/schemas/task-schema";
 
+import { NextResponse } from "next/server";
+
+import { requireAuthentication } from "@/shared/presentation/http/require-authentication";
+
 function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
   return {
     title: input.title,
@@ -20,6 +24,19 @@ function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
 }
 
 export async function GET(): Promise<Response> {
+  const session = await requireAuthentication();
+
+  if (session === null) {
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   try {
     const tasks = await taskService.listTasks();
 
@@ -32,6 +49,19 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const session = await requireAuthentication();
+
+  if (session === null) {
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   const jsonResult = await readJsonBody(request);
 
   if (!jsonResult.ok) {

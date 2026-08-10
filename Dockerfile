@@ -25,6 +25,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Prisma Client generation / Next.js module evaluation requires a syntactically
 # valid DATABASE_URL, but no database connection should occur during image build.
 ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build_only"
+ENV AUTH_SECRET="build-only-auth-secret-00000000000000000000000000000000"
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+import { signInForE2E } from "./support/auth";
+
 import { e2ePrisma, resetE2eDatabase, TaskStatus } from "./support/database";
+
+test.beforeEach(async ({ page }) => {
+  await signInForE2E(page);
+});
 
 test.beforeEach(async () => {
   await resetE2eDatabase();
