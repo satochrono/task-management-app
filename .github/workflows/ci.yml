@@ -75,9 +75,12 @@ jobs:
     timeout-minutes: 20
     needs:
       - quality
+
     env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/task_management_test
-      AUTH_SECRET: ci-integration-auth-secret-2026-at-least-32-chars
+      DATABASE_URL: postgresql://task_app:task_app_ci_password@127.0.0.1:5432/task_management_test
+      NODE_ENV: test
+      AUTH_SECRET: ci-integration-auth-secret-2026-at-least-32-characters
+
     services:
       postgres:
         image: postgres:18.4-bookworm
@@ -92,10 +95,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-    env:
-      DATABASE_URL: postgresql://task_app:task_app_ci_password@127.0.0.1:5432/task_management_test
-      NODE_ENV: test
 
     steps:
       - name: Checkout repository
@@ -143,11 +142,16 @@ jobs:
     timeout-minutes: 30
     needs:
       - quality
+
     env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/task_management_e2e
+      DATABASE_URL: postgresql://task_app:task_app_ci_password@127.0.0.1:5432/task_management_e2e
+      NODE_ENV: test
       AUTH_SECRET: ci-e2e-auth-secret-2026-at-least-32-characters
       SEED_USER_EMAIL: e2e@example.com
       SEED_USER_PASSWORD: E2E-Test-Password-2026!
+      PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:3100
+      CI: "true"
+
     services:
       postgres:
         image: postgres:18.4-bookworm
@@ -162,12 +166,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-    env:
-      DATABASE_URL: postgresql://task_app:task_app_ci_password@127.0.0.1:5432/task_management_e2e
-      NODE_ENV: test
-      PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:3100
-      CI: "true"
 
     steps:
       - name: Checkout repository
@@ -206,6 +204,9 @@ jobs:
       - name: Check migration status
         run: pnpm db:status
 
+      - name: Seed E2E database
+        run: pnpm db:seed
+
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
@@ -240,6 +241,7 @@ jobs:
     env:
       NODE_ENV: production
       DATABASE_URL: postgresql://task_app:build_only_password@127.0.0.1:5432/task_management_build
+      AUTH_SECRET: ci-build-auth-secret-2026-at-least-32-characters
 
     steps:
       - name: Checkout repository
