@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   description: "Business task management application",
 };
 
-type RootLayoutProps = Readonly<{
+export default function RootLayout({
+  children,
+}: Readonly<{
   children: React.ReactNode;
-}>;
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}>) {
   return (
     <html lang="ja">
       <body>{children}</body>

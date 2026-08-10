@@ -51,6 +51,8 @@ export default defineConfig({
       {
         resolve: {
           alias: {
+            "@/shared/presentation/http/require-authentication":
+              import.meta.dirname + "/test/support/require-authentication.ts",
             "@": srcAlias,
             "server-only": serverOnlyShim,
           },
