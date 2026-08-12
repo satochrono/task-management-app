@@ -15,6 +15,11 @@ enum TaskStatus {
   @@map("task_status")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model Task {
   id          String     @id @default(uuid()) @db.Uuid
   title       String     @db.VarChar(200)
@@ -23,8 +28,11 @@ model Task {
   dueDate     DateTime?  @map("due_date") @db.Timestamptz(3)
   createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  ownerId     String     @map("owner_id") @db.Uuid
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Restrict)
 
   @@index([status])
+  @@index([ownerId])
   @@map("tasks")
 }
 
@@ -33,8 +41,11 @@ model User {
   email        String   @unique @db.VarChar(320)
   name         String?  @db.VarChar(100)
   passwordHash String   @map("password_hash") @db.VarChar(60)
+  role         UserRole @default(USER)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tasks Task[]
 
   @@map("users")
 }

@@ -37,6 +37,7 @@ describe("AuthenticateUser", () => {
         email: "user@example.com",
         name: "User",
         passwordHash: "hash",
+        role: "USER",
       }),
       new FakePasswordHasher(true),
     );
@@ -50,6 +51,32 @@ describe("AuthenticateUser", () => {
       id: "user-1",
       email: "user@example.com",
       name: "User",
+      role: "USER",
+    });
+  });
+
+  it("preserves the ADMIN role for an authenticated user", async () => {
+    const service = new AuthenticateUser(
+      new FakeUserRepository({
+        id: "admin-1",
+        email: "admin@example.com",
+        name: "Admin",
+        passwordHash: "hash",
+        role: "ADMIN",
+      }),
+      new FakePasswordHasher(true),
+    );
+
+    await expect(
+      service.execute({
+        email: "admin@example.com",
+        password: "password",
+      }),
+    ).resolves.toEqual({
+      id: "admin-1",
+      email: "admin@example.com",
+      name: "Admin",
+      role: "ADMIN",
     });
   });
 
@@ -74,6 +101,7 @@ describe("AuthenticateUser", () => {
         email: "user@example.com",
         name: "User",
         passwordHash: "hash",
+        role: "USER",
       }),
       new FakePasswordHasher(false),
     );

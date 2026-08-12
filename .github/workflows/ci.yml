@@ -149,6 +149,8 @@ jobs:
       AUTH_SECRET: ci-e2e-auth-secret-2026-at-least-32-characters
       SEED_USER_EMAIL: e2e@example.com
       SEED_USER_PASSWORD: E2E-Test-Password-2026!
+      SEED_SECOND_USER_EMAIL: e2e-second@example.com
+      SEED_SECOND_USER_PASSWORD: E2E-Second-Test-Password-2026!
       PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:3100
       CI: "true"
 

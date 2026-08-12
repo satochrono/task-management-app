@@ -111,7 +111,9 @@ try {
         'DATABASE_URL',
         'AUTH_SECRET',
         'SEED_USER_EMAIL',
-        'SEED_USER_PASSWORD'
+        'SEED_USER_PASSWORD',
+        'SEED_SECOND_USER_EMAIL',
+        'SEED_SECOND_USER_PASSWORD'
     )
 
     foreach ($requiredVariable in $requiredVariables) {
@@ -140,6 +142,28 @@ try {
 
     if ($seedPasswordByteCount -gt 72) {
         throw 'SEED_USER_PASSWORD in .env.e2e must be at most 72 UTF-8 bytes.'
+    }
+
+    $secondSeedPasswordByteCount =
+        [System.Text.Encoding]::UTF8.GetByteCount(
+            $env:SEED_SECOND_USER_PASSWORD
+        )
+
+    if ($secondSeedPasswordByteCount -gt 72) {
+        throw 'SEED_SECOND_USER_PASSWORD in .env.e2e must be at most 72 UTF-8 bytes.'
+    }
+
+    $normalizedSeedUserEmail =
+        $env:SEED_USER_EMAIL.Trim().ToLowerInvariant()
+
+    $normalizedSecondSeedUserEmail =
+        $env:SEED_SECOND_USER_EMAIL.Trim().ToLowerInvariant()
+
+    if (
+        $normalizedSeedUserEmail -eq
+        $normalizedSecondSeedUserEmail
+    ) {
+        throw 'SEED_SECOND_USER_EMAIL must differ from SEED_USER_EMAIL.'
     }
 
     #
@@ -214,10 +238,7 @@ try {
     }
 
     #
-    # Seed the E2E authentication user.
-    #
-    # DATABASE_URL, SEED_USER_EMAIL, and SEED_USER_PASSWORD are already
-    # present in this process, so the seed command targets task_management_e2e.
+    # Seed both E2E authentication users.
     #
     Write-Host ''
     Write-Host '=== Seed E2E database ==='
