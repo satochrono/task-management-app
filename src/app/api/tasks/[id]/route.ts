@@ -14,6 +14,10 @@ import {
   type TaskWriteInput,
 } from "@/modules/task/presentation/schemas/task-schema";
 import { requireAuthentication } from "@/shared/presentation/http/require-authentication";
+import {
+  createRequestContext,
+  withRequestId,
+} from "@/shared/presentation/http/request-context";
 
 interface TaskRouteContext {
   params: Promise<{
@@ -31,19 +35,24 @@ function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: TaskRouteContext,
 ): Promise<Response> {
+  const requestContext = createRequestContext(request);
+
   const session = await requireAuthentication();
 
   if (session === null) {
-    return NextResponse.json(
-      {
-        error: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+    return withRequestId(
+      NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      ),
+      requestContext,
     );
   }
 
@@ -54,17 +63,31 @@ export async function GET(
   const idResult = taskIdSchema.safeParse(id);
 
   if (!idResult.success) {
-    return validationErrorResponse(idResult.error);
+    return withRequestId(
+      validationErrorResponse(idResult.error),
+      requestContext,
+    );
   }
 
   try {
     const task = await taskService.getTask(actor, idResult.data);
 
-    return Response.json({
-      data: task,
-    });
+    return withRequestId(
+      Response.json({
+        data: task,
+      }),
+      requestContext,
+    );
   } catch (error: unknown) {
-    return taskErrorResponse(error);
+    return withRequestId(
+      taskErrorResponse(error, requestContext, {
+        userId: actor.userId,
+        role: actor.role,
+        taskId: idResult.data,
+        method: "GET",
+      }),
+      requestContext,
+    );
   }
 }
 
@@ -72,16 +95,21 @@ export async function PUT(
   request: Request,
   context: TaskRouteContext,
 ): Promise<Response> {
+  const requestContext = createRequestContext(request);
+
   const session = await requireAuthentication();
 
   if (session === null) {
-    return NextResponse.json(
-      {
-        error: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+    return withRequestId(
+      NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      ),
+      requestContext,
     );
   }
 
@@ -92,19 +120,25 @@ export async function PUT(
   const idResult = taskIdSchema.safeParse(id);
 
   if (!idResult.success) {
-    return validationErrorResponse(idResult.error);
+    return withRequestId(
+      validationErrorResponse(idResult.error),
+      requestContext,
+    );
   }
 
   const jsonResult = await readJsonBody(request);
 
   if (!jsonResult.ok) {
-    return jsonResult.response;
+    return withRequestId(jsonResult.response, requestContext);
   }
 
   const validationResult = taskWriteSchema.safeParse(jsonResult.value);
 
   if (!validationResult.success) {
-    return validationErrorResponse(validationResult.error);
+    return withRequestId(
+      validationErrorResponse(validationResult.error),
+      requestContext,
+    );
   }
 
   try {
@@ -114,28 +148,44 @@ export async function PUT(
       toTaskWriteData(validationResult.data),
     );
 
-    return Response.json({
-      data: task,
-    });
+    return withRequestId(
+      Response.json({
+        data: task,
+      }),
+      requestContext,
+    );
   } catch (error: unknown) {
-    return taskErrorResponse(error);
+    return withRequestId(
+      taskErrorResponse(error, requestContext, {
+        userId: actor.userId,
+        role: actor.role,
+        taskId: idResult.data,
+        method: "PUT",
+      }),
+      requestContext,
+    );
   }
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: TaskRouteContext,
 ): Promise<Response> {
+  const requestContext = createRequestContext(request);
+
   const session = await requireAuthentication();
 
   if (session === null) {
-    return NextResponse.json(
-      {
-        error: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+    return withRequestId(
+      NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      ),
+      requestContext,
     );
   }
 
@@ -146,16 +196,30 @@ export async function DELETE(
   const idResult = taskIdSchema.safeParse(id);
 
   if (!idResult.success) {
-    return validationErrorResponse(idResult.error);
+    return withRequestId(
+      validationErrorResponse(idResult.error),
+      requestContext,
+    );
   }
 
   try {
     await taskService.deleteTask(actor, idResult.data);
 
-    return new Response(null, {
-      status: 204,
-    });
+    return withRequestId(
+      new Response(null, {
+        status: 204,
+      }),
+      requestContext,
+    );
   } catch (error: unknown) {
-    return taskErrorResponse(error);
+    return withRequestId(
+      taskErrorResponse(error, requestContext, {
+        userId: actor.userId,
+        role: actor.role,
+        taskId: idResult.data,
+        method: "DELETE",
+      }),
+      requestContext,
+    );
   }
 }

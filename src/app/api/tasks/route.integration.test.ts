@@ -126,9 +126,17 @@ describe("/api/tasks", () => {
       },
     });
 
-    const response = await GET();
+    const request = new Request("http://localhost:3000/api/tasks", {
+      headers: {
+        "x-request-id": "integration-request-id",
+      },
+    });
+
+    const response = await GET(request);
 
     expect(response.status).toBe(200);
+
+    expect(response.headers.get("x-request-id")).toBe("integration-request-id");
 
     const body = (await response.json()) as {
       data: Array<{

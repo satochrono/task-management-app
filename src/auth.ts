@@ -2,6 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import { authenticateUser } from "@/auth/container";
+import {
+  logAuthenticationFailed,
+  logAuthenticationSucceeded,
+} from "@/auth/infrastructure/authentication-event-logger";
 import { loginSchema } from "@/auth/login-schema";
 import { env } from "@/env";
 
@@ -33,10 +37,22 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
 
         if (!parsed.success) {
+          logAuthenticationFailed();
+
           return null;
         }
 
-        return authenticateUser.execute(parsed.data);
+        const user = await authenticateUser.execute(parsed.data);
+
+        if (user === null) {
+          logAuthenticationFailed();
+
+          return null;
+        }
+
+        logAuthenticationSucceeded(user);
+
+        return user;
       },
     }),
   ],
@@ -44,6 +60,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     authorized({ auth, request }) {
       const isLoggedIn = Boolean(auth?.user);
+
       const pathname = request.nextUrl.pathname;
 
       if (pathname.startsWith("/tasks")) {

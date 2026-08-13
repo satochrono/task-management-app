@@ -1,11 +1,21 @@
 import type { ZodError } from "zod";
 
+import type { UserRole } from "@/auth/domain/user-role";
 import { InvalidTaskStatusTransitionError } from "@/modules/task/domain/errors/invalid-task-status-transition-error";
 import { TaskNotFoundError } from "@/modules/task/domain/errors/task-not-found-error";
 import type {
   ApiErrorResponse,
   ApiValidationIssue,
 } from "@/modules/task/presentation/http/api-types";
+import { logger } from "@/shared/infrastructure/logging/logger";
+import type { RequestContext } from "@/shared/presentation/http/request-context";
+
+interface TaskRequestLogContext {
+  userId: string;
+  role: UserRole;
+  taskId: string;
+  method: "GET" | "PUT" | "DELETE";
+}
 
 function errorResponse(
   status: number,
@@ -50,8 +60,26 @@ export function validationErrorResponse(error: ZodError): Response {
   );
 }
 
-export function taskErrorResponse(error: unknown): Response {
+export function taskErrorResponse(
+  error: unknown,
+  context?: RequestContext,
+  taskRequestContext?: TaskRequestLogContext,
+): Response {
   if (error instanceof TaskNotFoundError) {
+    if (taskRequestContext !== undefined) {
+      logger.warn(
+        "task_access_not_found",
+        "Task access resulted in not found.",
+        {
+          requestId: context?.requestId ?? null,
+          userId: taskRequestContext.userId,
+          role: taskRequestContext.role,
+          taskId: taskRequestContext.taskId,
+          method: taskRequestContext.method,
+        },
+      );
+    }
+
     return errorResponse(
       404,
       "TASK_NOT_FOUND",
@@ -67,8 +95,9 @@ export function taskErrorResponse(error: unknown): Response {
     );
   }
 
-  console.error("Unhandled task request error.", {
-    name: error instanceof Error ? error.name : "UnknownError",
+  logger.error("task_request_failed", "Unhandled task request error.", {
+    requestId: context?.requestId ?? null,
+    errorName: error instanceof Error ? error.name : "UnknownError",
   });
 
   return errorResponse(

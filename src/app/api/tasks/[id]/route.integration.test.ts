@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DELETE, GET, PUT } from "@/app/api/tasks/[id]/route";
+import { logger } from "@/shared/infrastructure/logging/logger";
 import { prisma } from "@/shared/infrastructure/database/prisma";
 
 const INTEGRATION_USER_ID = "30000000-0000-4000-8000-000000000001";
@@ -38,6 +39,10 @@ describe("/api/tasks/[id]", () => {
     });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("returns task detail", async () => {
     const task = await prisma.task.create({
       data: {
@@ -64,14 +69,40 @@ describe("/api/tasks/[id]", () => {
     expect(body.data.title).toBe("Detail task");
   });
 
-  it("returns 404 when task does not exist", async () => {
+  it("returns 404 with correlated request id and warning log when task does not exist", async () => {
+    const warnSpy = vi
+      .spyOn(logger, "warn")
+      .mockImplementation(() => undefined);
+
     const id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
-    const request = new Request(`http://localhost:3000/api/tasks/${id}`);
+    const request = new Request(`http://localhost:3000/api/tasks/${id}`, {
+      headers: {
+        "x-request-id": "observability-integration-request",
+      },
+    });
 
     const response = await GET(request, context(id));
 
     expect(response.status).toBe(404);
+
+    expect(response.headers.get("x-request-id")).toBe(
+      "observability-integration-request",
+    );
+
+    expect(warnSpy).toHaveBeenCalledOnce();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "task_access_not_found",
+      "Task access resulted in not found.",
+      {
+        requestId: "observability-integration-request",
+        userId: INTEGRATION_USER_ID,
+        role: "ADMIN",
+        taskId: id,
+        method: "GET",
+      },
+    );
   });
 
   it("updates task", async () => {
