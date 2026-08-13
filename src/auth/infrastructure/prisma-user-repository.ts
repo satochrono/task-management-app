@@ -3,8 +3,7 @@ import "server-only";
 import type {
   AuthenticationUserRecord,
   UserRepository,
-} from "../domain/user-repository";
-
+} from "@/auth/domain/user-repository";
 import { prisma } from "@/shared/infrastructure/database/prisma";
 
 export class PrismaUserRepository implements UserRepository {
@@ -18,10 +17,11 @@ export class PrismaUserRepository implements UserRepository {
         email: true,
         name: true,
         passwordHash: true,
+        role: true,
       },
     });
 
-    if (user === null) {
+    if (!user) {
       return null;
     }
 
@@ -30,6 +30,7 @@ export class PrismaUserRepository implements UserRepository {
       email: user.email,
       name: user.name,
       passwordHash: user.passwordHash,
+      role: user.role,
     };
   }
 }

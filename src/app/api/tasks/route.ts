@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+
+import { createAuthorizationActor } from "@/auth/application/create-authorization-actor";
 import type { TaskWriteData } from "@/modules/task/domain/task";
 import { taskService } from "@/modules/task/infrastructure/task-container";
 import {
@@ -9,9 +12,6 @@ import {
   taskWriteSchema,
   type TaskWriteInput,
 } from "@/modules/task/presentation/schemas/task-schema";
-
-import { NextResponse } from "next/server";
-
 import { requireAuthentication } from "@/shared/presentation/http/require-authentication";
 
 function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
@@ -37,8 +37,10 @@ export async function GET(): Promise<Response> {
     );
   }
 
+  const actor = createAuthorizationActor(session.user);
+
   try {
-    const tasks = await taskService.listTasks();
+    const tasks = await taskService.listTasks(actor);
 
     return Response.json({
       data: tasks,
@@ -62,6 +64,8 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const actor = createAuthorizationActor(session.user);
+
   const jsonResult = await readJsonBody(request);
 
   if (!jsonResult.ok) {
@@ -76,6 +80,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const task = await taskService.createTask(
+      actor,
       toTaskWriteData(validationResult.data),
     );
 

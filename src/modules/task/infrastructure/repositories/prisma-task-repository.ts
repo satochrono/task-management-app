@@ -9,6 +9,7 @@ import type {
   TaskStatus,
   TaskWriteData,
 } from "@/modules/task/domain/task";
+import type { TaskAccessScope } from "@/modules/task/domain/task-access-scope";
 import type { TaskRepository } from "@/modules/task/domain/repositories/task-repository";
 
 function toDomainStatus(status: PrismaTaskStatus): TaskStatus {
@@ -33,12 +34,39 @@ function toPrismaStatus(status: TaskStatus): PrismaTaskStatus {
   }
 }
 
+function buildTaskWhere(scope: TaskAccessScope): Prisma.TaskWhereInput {
+  if (scope.kind === "ALL") {
+    return {};
+  }
+
+  return {
+    ownerId: scope.ownerId,
+  };
+}
+
+function buildTaskUniqueWhere(
+  id: string,
+  scope: TaskAccessScope,
+): Prisma.TaskWhereUniqueInput {
+  if (scope.kind === "ALL") {
+    return {
+      id,
+    };
+  }
+
+  return {
+    id,
+    ownerId: scope.ownerId,
+  };
+}
+
 function toDomainTask(task: {
   id: string;
   title: string;
   description: string | null;
   status: PrismaTaskStatus;
   dueDate: Date | null;
+  ownerId: string;
   createdAt: Date;
   updatedAt: Date;
 }): Task {
@@ -48,6 +76,7 @@ function toDomainTask(task: {
     description: task.description,
     status: toDomainStatus(task.status),
     dueDate: task.dueDate,
+    ownerId: task.ownerId,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
   };
@@ -56,8 +85,9 @@ function toDomainTask(task: {
 export class PrismaTaskRepository implements TaskRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(): Promise<Task[]> {
+  async findAll(scope: TaskAccessScope): Promise<Task[]> {
     const tasks = await this.prisma.task.findMany({
+      where: buildTaskWhere(scope),
       orderBy: {
         createdAt: "desc",
       },
@@ -66,35 +96,39 @@ export class PrismaTaskRepository implements TaskRepository {
     return tasks.map(toDomainTask);
   }
 
-  async findById(id: string): Promise<Task | null> {
-    const task = await this.prisma.task.findUnique({
+  async findById(id: string, scope: TaskAccessScope): Promise<Task | null> {
+    const task = await this.prisma.task.findFirst({
       where: {
         id,
+        ...buildTaskWhere(scope),
       },
     });
 
     return task === null ? null : toDomainTask(task);
   }
 
-  async create(data: TaskWriteData): Promise<Task> {
+  async create(ownerId: string, data: TaskWriteData): Promise<Task> {
     const task = await this.prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
         status: toPrismaStatus(data.status),
         dueDate: data.dueDate,
+        ownerId,
       },
     });
 
     return toDomainTask(task);
   }
 
-  async update(id: string, data: TaskWriteData): Promise<Task> {
+  async update(
+    id: string,
+    scope: TaskAccessScope,
+    data: TaskWriteData,
+  ): Promise<Task> {
     try {
       const task = await this.prisma.task.update({
-        where: {
-          id,
-        },
+        where: buildTaskUniqueWhere(id, scope),
         data: {
           title: data.title,
           description: data.description,
@@ -116,12 +150,10 @@ export class PrismaTaskRepository implements TaskRepository {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, scope: TaskAccessScope): Promise<void> {
     try {
       await this.prisma.task.delete({
-        where: {
-          id,
-        },
+        where: buildTaskUniqueWhere(id, scope),
       });
     } catch (error: unknown) {
       if (

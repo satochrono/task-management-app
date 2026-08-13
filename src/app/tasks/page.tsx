@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 
+import { createAuthorizationActor } from "@/auth/application/create-authorization-actor";
+import { auth } from "@/auth";
 import { taskService } from "@/modules/task/infrastructure/task-container";
 import { DeleteTaskButton } from "@/modules/task/presentation/components/delete-task-button";
 
@@ -39,8 +42,16 @@ function formatDateTime(value: string): string {
 export default async function TasksPage({ searchParams }: TasksPageProps) {
   await connection();
 
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const actor = createAuthorizationActor(session.user);
+
   const [tasks, resolvedSearchParams] = await Promise.all([
-    taskService.listTasks(),
+    taskService.listTasks(actor),
     searchParams,
   ]);
 

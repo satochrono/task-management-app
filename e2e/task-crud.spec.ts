@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 import { signInForE2E } from "./support/auth";
-
-import { e2ePrisma, resetE2eDatabase, TaskStatus } from "./support/database";
+import {
+  e2ePrisma,
+  getSeedUser,
+  resetE2eDatabase,
+  TaskStatus,
+} from "./support/database";
 
 test.beforeEach(async ({ page }) => {
   await signInForE2E(page);
@@ -33,6 +37,8 @@ test("shows an empty task list", async ({ page }) => {
 });
 
 test("creates a task from the UI", async ({ page }) => {
+  const seedUser = await getSeedUser();
+
   await page.goto("/tasks/new");
 
   await page.getByLabel("タイトル").fill("Playwright新規Task");
@@ -58,16 +64,19 @@ test("creates a task from the UI", async ({ page }) => {
   });
 
   expect(savedTask).not.toBeNull();
-
   expect(savedTask?.status).toBe(TaskStatus.TODO);
+  expect(savedTask?.ownerId).toBe(seedUser.id);
 });
 
 test("shows task detail", async ({ page }) => {
+  const seedUser = await getSeedUser();
+
   const task = await e2ePrisma.task.create({
     data: {
       title: "詳細確認Task",
       description: "Playwright詳細確認",
       status: TaskStatus.TODO,
+      ownerId: seedUser.id,
     },
   });
 
@@ -79,11 +88,14 @@ test("shows task detail", async ({ page }) => {
 });
 
 test("updates a task from the UI", async ({ page }) => {
+  const seedUser = await getSeedUser();
+
   const task = await e2ePrisma.task.create({
     data: {
       title: "更新前Task",
       description: null,
       status: TaskStatus.TODO,
+      ownerId: seedUser.id,
     },
   });
 
@@ -112,13 +124,17 @@ test("updates a task from the UI", async ({ page }) => {
   });
 
   expect(updatedTask?.status).toBe(TaskStatus.IN_PROGRESS);
+  expect(updatedTask?.ownerId).toBe(seedUser.id);
 });
 
 test("prevents DONE task from directly selecting TODO", async ({ page }) => {
+  const seedUser = await getSeedUser();
+
   const task = await e2ePrisma.task.create({
     data: {
       title: "完了済みTask",
       status: TaskStatus.DONE,
+      ownerId: seedUser.id,
     },
   });
 
@@ -134,10 +150,13 @@ test("prevents DONE task from directly selecting TODO", async ({ page }) => {
 });
 
 test("deletes a task from the UI", async ({ page }) => {
+  const seedUser = await getSeedUser();
+
   const task = await e2ePrisma.task.create({
     data: {
       title: "削除対象Task",
       status: TaskStatus.TODO,
+      ownerId: seedUser.id,
     },
   });
 

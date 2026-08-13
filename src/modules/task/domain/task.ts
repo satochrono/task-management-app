@@ -10,6 +10,7 @@ export interface Task {
   description: string | null;
   status: TaskStatus;
   dueDate: Date | null;
+  ownerId: string;
   createdAt: Date;
   updatedAt: Date;
 }

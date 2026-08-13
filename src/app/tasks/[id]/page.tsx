@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 
+import { createAuthorizationActor } from "@/auth/application/create-authorization-actor";
+import { auth } from "@/auth";
 import { TaskNotFoundError } from "@/modules/task/domain/errors/task-not-found-error";
 import { taskService } from "@/modules/task/infrastructure/task-container";
 import { DeleteTaskButton } from "@/modules/task/presentation/components/delete-task-button";
@@ -36,6 +38,14 @@ export default async function TaskDetailPage({
 }: TaskDetailPageProps) {
   await connection();
 
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const actor = createAuthorizationActor(session.user);
+
   const { id } = await params;
 
   const idResult = taskIdSchema.safeParse(id);
@@ -47,7 +57,7 @@ export default async function TaskDetailPage({
   let task;
 
   try {
-    task = await taskService.getTask(idResult.data);
+    task = await taskService.getTask(actor, idResult.data);
   } catch (error: unknown) {
     if (error instanceof TaskNotFoundError) {
       notFound();

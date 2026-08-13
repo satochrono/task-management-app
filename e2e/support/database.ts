@@ -1,6 +1,10 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient, TaskStatus } from "../../src/generated/prisma/client";
+import {
+  PrismaClient,
+  TaskStatus,
+  UserRole,
+} from "../../src/generated/prisma/client";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -34,8 +38,28 @@ export const e2ePrisma = new PrismaClient({
   adapter,
 });
 
-export { TaskStatus };
+export { TaskStatus, UserRole };
 
 export async function resetE2eDatabase(): Promise<void> {
   await e2ePrisma.task.deleteMany();
+}
+
+export async function getSeedUser() {
+  const email = process.env.SEED_USER_EMAIL?.trim().toLowerCase();
+
+  if (!email) {
+    throw new Error("SEED_USER_EMAIL is required for E2E tests.");
+  }
+
+  const user = await e2ePrisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (user === null) {
+    throw new Error(`E2E seed user does not exist: ${email}`);
+  }
+
+  return user;
 }
