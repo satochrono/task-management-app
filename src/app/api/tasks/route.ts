@@ -13,6 +13,10 @@ import {
   type TaskWriteInput,
 } from "@/modules/task/presentation/schemas/task-schema";
 import { requireAuthentication } from "@/shared/presentation/http/require-authentication";
+import {
+  createRequestContext,
+  withRequestId,
+} from "@/shared/presentation/http/request-context";
 
 function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
   return {
@@ -23,17 +27,22 @@ function toTaskWriteData(input: TaskWriteInput): TaskWriteData {
   };
 }
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
+  const context = createRequestContext(request);
+
   const session = await requireAuthentication();
 
   if (session === null) {
-    return NextResponse.json(
-      {
-        error: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+    return withRequestId(
+      NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      ),
+      context,
     );
   }
 
@@ -42,25 +51,33 @@ export async function GET(): Promise<Response> {
   try {
     const tasks = await taskService.listTasks(actor);
 
-    return Response.json({
-      data: tasks,
-    });
+    return withRequestId(
+      Response.json({
+        data: tasks,
+      }),
+      context,
+    );
   } catch (error: unknown) {
-    return taskErrorResponse(error);
+    return withRequestId(taskErrorResponse(error, context), context);
   }
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const context = createRequestContext(request);
+
   const session = await requireAuthentication();
 
   if (session === null) {
-    return NextResponse.json(
-      {
-        error: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+    return withRequestId(
+      NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      ),
+      context,
     );
   }
 
@@ -69,13 +86,16 @@ export async function POST(request: Request): Promise<Response> {
   const jsonResult = await readJsonBody(request);
 
   if (!jsonResult.ok) {
-    return jsonResult.response;
+    return withRequestId(jsonResult.response, context);
   }
 
   const validationResult = taskWriteSchema.safeParse(jsonResult.value);
 
   if (!validationResult.success) {
-    return validationErrorResponse(validationResult.error);
+    return withRequestId(
+      validationErrorResponse(validationResult.error),
+      context,
+    );
   }
 
   try {
@@ -84,15 +104,18 @@ export async function POST(request: Request): Promise<Response> {
       toTaskWriteData(validationResult.data),
     );
 
-    return Response.json(
-      {
-        data: task,
-      },
-      {
-        status: 201,
-      },
+    return withRequestId(
+      Response.json(
+        {
+          data: task,
+        },
+        {
+          status: 201,
+        },
+      ),
+      context,
     );
   } catch (error: unknown) {
-    return taskErrorResponse(error);
+    return withRequestId(taskErrorResponse(error, context), context);
   }
 }

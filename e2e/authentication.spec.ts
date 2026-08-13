@@ -209,3 +209,23 @@ test("returns 404 when DELETE API targets another user's task", async ({
   expect(stored).not.toBeNull();
   expect(stored?.ownerId).toBe(otherUser.id);
 });
+
+test("applies security headers", async ({ request }) => {
+  const response = await request.get("/");
+
+  expect(response.status()).toBe(200);
+
+  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+
+  expect(response.headers()["x-frame-options"]).toBe("DENY");
+
+  expect(response.headers()["referrer-policy"]).toBe(
+    "strict-origin-when-cross-origin",
+  );
+
+  expect(response.headers()["permissions-policy"]).toBe(
+    "camera=(), microphone=(), geolocation=()",
+  );
+
+  expect(response.headers()["x-powered-by"]).toBeUndefined();
+});
