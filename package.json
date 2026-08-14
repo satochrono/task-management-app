@@ -28,6 +28,7 @@
     "test:coverage": "vitest run --project unit --project component --coverage",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
     "check:full": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-full.ps1",
+    "env:validate:production": "node ./scripts/validate-production-env.mjs",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f db",

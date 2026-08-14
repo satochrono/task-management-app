@@ -16,18 +16,15 @@ dist/
 coverage/
 playwright-report/
 test-results/
+blob-report/
 
 # Environment variables
 .env
-.env.e2e
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.test
-!.env.e2e.example
-!.env.test.example
+.env.*
 !.env.example
+!.env.test.example
+!.env.e2e.example
+!.env.production.example
 
 # Generated Prisma Client
 src/generated/prisma/
@@ -51,6 +48,9 @@ Desktop.ini
 .vscode/*.local.json
 
 # IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 
 # Temporary files
@@ -58,22 +58,6 @@ Desktop.ini
 *.temp
 *.swp
 *.swo
-
-# VS Code local-only files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-
-# Prisma generated client
-src/generated/prisma/
-
-# Test coverage
-coverage/
-
-# Playwright
-playwright-report/
-test-results/
-blob-report/
 
 # Logs
 *.log

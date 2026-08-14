@@ -21,17 +21,17 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build-time only.
-# Prisma Client generation / Next.js module evaluation requires a syntactically
-# valid DATABASE_URL, but no database connection should occur during image build.
-ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build_only"
-ENV AUTH_SECRET="build-only-auth-secret-00000000000000000000000000000000"
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN pnpm db:generate
-RUN pnpm build
+
+# Next.js evaluates server modules during the production build.
+# These are non-secret, build-only placeholder values and are scoped to
+# this command so they are not persisted as builder-stage ENV settings.
+RUN DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build_only" \
+    AUTH_SECRET="build-only-auth-secret-00000000000000000000000000000000" \
+    pnpm build
 
 
 FROM node:24.19.0-bookworm-slim AS runner
@@ -64,5 +64,12 @@ COPY --from=builder \
 USER nextjs
 
 EXPOSE 3000
+
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=5s \
+    --start-period=10s \
+    --retries=3 \
+    CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health/live').then((response)=>{if(!response.ok)process.exit(1)}).catch(()=>process.exit(1))"]
 
 CMD ["node", "server.js"]

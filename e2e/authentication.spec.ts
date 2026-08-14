@@ -215,6 +215,18 @@ test("applies security headers", async ({ request }) => {
 
   expect(response.status()).toBe(200);
 
+  const contentSecurityPolicy = response.headers()["content-security-policy"];
+
+  expect(contentSecurityPolicy).toBeDefined();
+  expect(contentSecurityPolicy).toContain("default-src 'self'");
+  expect(contentSecurityPolicy).toContain("script-src 'self' 'unsafe-inline'");
+  expect(contentSecurityPolicy).toContain("style-src 'self' 'unsafe-inline'");
+  expect(contentSecurityPolicy).toContain("connect-src 'self'");
+  expect(contentSecurityPolicy).toContain("object-src 'none'");
+  expect(contentSecurityPolicy).toContain("base-uri 'self'");
+  expect(contentSecurityPolicy).toContain("form-action 'self'");
+  expect(contentSecurityPolicy).toContain("frame-ancestors 'none'");
+
   expect(response.headers()["x-content-type-options"]).toBe("nosniff");
 
   expect(response.headers()["x-frame-options"]).toBe("DENY");
