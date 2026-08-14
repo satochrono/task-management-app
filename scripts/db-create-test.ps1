@@ -21,7 +21,10 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Failed to query PostgreSQL.'
 }
 
-if ($exists.Trim() -eq '1') {
+$existsText =
+    (@($exists) -join '').Trim()
+
+if ($existsText -eq '1') {
     Write-Host `
         "Database already exists: $databaseName"
 
